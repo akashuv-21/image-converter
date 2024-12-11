@@ -44,4 +44,27 @@
             <br>
             <button id="convert" onclick="convertImage()" style="display: none;">Convert</button>
             <div class="progress-bar">
-                <div class="progress-bar-fill" id="progressBar
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            <div id="output"></div>
+            <a id="downloadLink" download style="display: none;">Download Converted Image</a>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Image Converter</p>
+    </footer>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="script.js"></script>
+    <script>
+        function onSignIn(googleUser) {
+            const profile = googleUser.getBasicProfile();
+            document.getElementById('g-signin2').style.display = 'none';
+            document.getElementById('imageInput').style.display = 'block';
+            document.getElementById('format').style.display = 'block';
+            document.getElementById('convert').style.display = 'block';
+            document.getElementById('downloadLink').style.display = 'block';
+            alert(`Signed in as ${profile.getName()}`);
+        }
+    </script>
+</body>
+</html>
