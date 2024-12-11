@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Converter</title>
+    <title>Image Converter - PNG to JPG Converter, Free Image Converter, Cloud Converter</title>
+    <meta name="description" content="Convert images from PNG to JPG and other formats easily. Free image converter with support for SVG, WebP, and more. Use our cloud converter for quick and efficient image conversion.">
+    <meta name="keywords" content="png to jpg converter, image converter, free image converter, cloud converter, svg to jpg, webp to jpg, image conversion, cloud image conversion, free image conversion, online image converter">
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -88,6 +90,23 @@
         #downloadLink:hover {
             background-color: #218838;
         }
+        #googleSignIn {
+            display: none;
+            margin-top: 20px;
+        }
+        .google-signin-button {
+            padding: 10px 20px;
+            background-color: #DB4437;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .google-signin-button:hover {
+            background-color: #c23321;
+        }
     </style>
 </head>
 <body>
@@ -102,6 +121,8 @@
             <option value="gif">GIF</option>
             <option value="bmp">BMP</option>
             <option value="tiff">TIFF</option>
+            <option value="svg">SVG</option>
+            <option value="webp">WEBP</option>
         </select>
         <br>
         <button onclick="convertImage()">Convert</button>
@@ -110,14 +131,52 @@
         </div>
         <div id="output"></div>
         <a id="downloadLink" download>Download Converted Image</a>
+        <div id="googleSignIn">
+            <button class="google-signin-button" onclick="handleGoogleSignIn()">Sign in with Google</button>
+        </div>
     </div>
 
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script>
+        // Google Sign-In
+        function handleGoogleSignIn() {
+            const params = {
+                client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Replace with your Google Client ID
+                scope: 'profile email',
+                redirect_uri: 'https://akashuv-21.github.io/image-converter/', // Replace with your GitHub Pages URL
+                response_type: 'token'
+            };
+
+            const url = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(params)}`;
+            window.location.href = url;
+        }
+
+        // Check Conversion Count
+        function getConversionCount() {
+            return parseInt(localStorage.getItem('conversionConversion') || 0);
+        }
+
+        function setConversionCount(count) {
+            localStorage.setItem('conversionCount', count);
+        }
+
         async function convertImage() {
+            const conversionCount = getConversionCount();
+            if (conversionCount >= 3) {
+                document.getElementById('googleSignIn').style.display = 'block';
+                alert('You have reached the free conversion limit. Please sign in with Google to continue.');
+                return;
+            }
+
             const input = document.getElementById('imageInput');
             const file = input.files[0];
             if (!file) {
                 alert('Please select an image file.');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) { // 5 MB limit
+                alert('File size exceeds 5 MB limit.');
                 return;
             }
 
@@ -161,6 +220,8 @@
                 downloadLink.href = url;
                 downloadLink.download = `converted_image.${format}`;
                 downloadLink.style.display = 'block';
+
+                setConversionCount(conversionCount + 1);
             } catch (error) {
                 console.error('Error converting image:', error);
                 alert('Error converting image. Please try again.');
@@ -168,6 +229,16 @@
                 progressBarFill.style.width = '0%';
             }
         }
+
+        // Check Google Sign-In Status
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.hash.substring(1));
+            const accessToken = urlParams.get('access_token');
+            if (accessToken) {
+                document.getElementById('googleSignIn').style.display = 'none';
+                alert('You are signed in with Google. You can now convert images without limits.');
+            }
+        };
     </script>
 </body>
 </html>
