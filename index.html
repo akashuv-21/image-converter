@@ -3,67 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Converter - Convert Images to JPG, PNG, GIF, WebP, SVG, and More</title>
-    <meta name="description" content="Free online image converter to convert images to JPG, PNG, GIF, WebP, SVG, BMP, TIFF, ICO, and PSD. Easy to use and no sign-up required.">
-    <link rel="stylesheet" href="styles.css">
-    <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Image Converter",
-        "description": "Free online image converter to convert images to JPG, PNG, GIF, WebP, SVG, BMP, TIFF, ICO, and PSD. Easy to use and no sign-up required.",
-        "applicationCategory": "MultimediaApplication",
-        "operatingSystem": "All",
-        "url": "https://myimageconverter.com",
-        "image": "https://myimageconverter.com/logo.png"
-    }
-    </script>
+    <title>Image Converter</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: calc(100% - 22px);
+        }
+        select {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: calc(100% - 22px);
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            margin-top: 20px;
+        }
+        #output img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .progress-bar-fill {
+            width: 0;
+            height: 20px;
+            background-color: #007BFF;
+            transition: width 0.5s;
+        }
+        #downloadLink {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        #downloadLink:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <div class="container">
         <h1>Image Converter</h1>
-    </header>
-    <main>
-        <div class="container">
-            <div id="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
-            <input type="file" id="imageInput" accept="image/*" style="display: none;">
-            <br>
-            <label for="format">Convert to format:</label>
-            <select id="format" style="display: none;">
-                <option value="jpg">JPG</option>
-                <option value="png">PNG</option>
-                <option value="gif">GIF</option>
-                <option value="bmp">BMP</option>
-                <option value="tiff">TIFF</option>
-                <option value="webp">WebP</option>
-                <option value="svg">SVG</option>
-                <option value="ico">ICO</option>
-                <option value="psd">PSD</option>
-            </select>
-            <br>
-            <button id="convert" onclick="convertImage()" style="display: none;">Convert</button>
-            <div class="progress-bar">
-                <div class="progress-bar-fill" id="progressBarFill"></div>
-            </div>
-            <div id="output"></div>
-            <a id="downloadLink" download style="display: none;">Download Converted Image</a>
+        <input type="file" id="imageInput" accept="image/*">
+        <br>
+        <label for="format">Convert to format:</label>
+        <select id="format">
+            <option value="jpg">JPG</option>
+            <option value="png">PNG</option>
+            <option value="gif">GIF</option>
+            <option value="bmp">BMP</option>
+            <option value="tiff">TIFF</option>
+        </select>
+        <br>
+        <button onclick="convertImage()">Convert</button>
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
         </div>
-    </main>
-    <footer>
-        <p>&copy; 2024 Image Converter</p>
-    </footer>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <script src="script.js"></script>
+        <div id="output"></div>
+        <a id="downloadLink" download>Download Converted Image</a>
+    </div>
+
     <script>
-        function onSignIn(googleUser) {
-            const profile = googleUser.getBasicProfile();
-            document.getElementById('g-signin2').style.display = 'none';
-            document.getElementById('imageInput').style.display = 'block';
-            document.getElementById('format').style.display = 'block';
-            document.getElementById('convert').style.display = 'block';
-            document.getElementById('downloadLink').style.display = 'block';
-            alert(`Signed in as ${profile.getName()}`);
+        async function convertImage() {
+            const input = document.getElementById('imageInput');
+            const file = input.files[0];
+            if (!file) {
+                alert('Please select an image file.');
+                return;
+            }
+
+            const format = document.getElementById('format').value;
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'unassigned'); // Replace with your Upload Preset name
+
+            const progressBarFill = document.getElementById('progressBarFill');
+            progressBarFill.style.width = '0%';
+
+            try {
+                const uploadResponse = await fetch('https://api.cloudinary.com/v1_1/dqdtx0sv6/image/upload', { // Replace with your Cloud Name
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                const uploadData = await uploadResponse.json();
+                const publicId = uploadData.public_id;
+
+                progressBarFill.style.width = '50%';
+
+                const conversionResponse = await fetch(`https://res.cloudinary.com/dqdtx0sv6/image/upload/v1/${publicId}.${format}`); // Replace with your Cloud Name
+                if (!conversionResponse.ok) {
+                    throw new Error('Conversion failed');
+                }
+
+                const blob = await conversionResponse.blob();
+                const url = URL.createObjectURL(blob);
+
+                progressBarFill.style.width = '100%';
+
+                const output = document.getElementById('output');
+                output.innerHTML = `<img src="${url}" alt="Converted Image" style="max-width: 100%; height: auto;">`;
+
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.href = url;
+                downloadLink.download = `converted_image.${format}`;
+                downloadLink.style.display = 'block';
+            } catch (error) {
+                console.error('Error converting image:', error);
+                alert('Error converting image. Please try again.');
+            } finally {
+                progressBarFill.style.width = '0%';
+            }
         }
     </script>
 </body>
