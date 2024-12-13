@@ -3,116 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Converter - PNG to JPG Converter, Free Image Converter, Cloud Converter</title>
+    <title>Image Converter - PNG to JPG Converter, Free Image Converter</title>
+    <link rel="stylesheet" href="styles.css">
     <meta name="description" content="Convert images from PNG to JPG and other formats easily. Free image converter with support for SVG, WebP, and more. Use our cloud converter for quick and efficient image conversion.">
     <meta name="keywords" content="png to jpg converter, image converter, free image converter, cloud converter, svg to jpg, webp to jpg, image conversion, cloud image conversion, free image conversion, online image converter">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-        }
-        h1 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        input[type="file"] {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: calc(100% - 22px);
-        }
-        select {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: calc(100% - 22px);
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #output {
-            margin-top: 20px;
-        }
-        #output img {
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .progress-bar {
-            width: 100%;
-            background-color: #f3f3f3;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-top: 20px;
-        }
-        .progress-bar-fill {
-            width: 0;
-            height: 20px;
-            background-color: #007BFF;
-            transition: width 0.5s;
-        }
-        #downloadLink {
-            display: none;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        #downloadLink:hover {
-            background-color: #218838;
-        }
-        #googleSignIn {
-            display: none;
-            margin-top: 20px;
-        }
-        .google-signin-button {
-            padding: 10px 20px;
-            background-color: #DB4437;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            width: 100%;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        .google-signin-button:hover {
-            background-color: #c23321;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
         <h1>Image Converter</h1>
         <input type="file" id="imageInput" accept="image/*">
+        <div id="fileError" class="error-message"></div>
         <br>
         <label for="format">Convert to format:</label>
         <select id="format">
@@ -125,120 +25,17 @@
             <option value="webp">WEBP</option>
         </select>
         <br>
-        <button onclick="convertImage()">Convert</button>
+        <button id="convertButton">Convert</button>
         <div class="progress-bar">
             <div class="progress-bar-fill" id="progressBarFill"></div>
         </div>
         <div id="output"></div>
         <a id="downloadLink" download>Download Converted Image</a>
         <div id="googleSignIn">
-            <button class="google-signin-button" onclick="handleGoogleSignIn()">Sign in with Google</button>
+            <button class="google-signin-button" id="googleSignInButton">Sign in with Google</button>
         </div>
     </div>
-
     <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <script>
-        // Google Sign-In
-        function handleGoogleSignIn() {
-            const params = {
-                client_id: '206202920391-14jskj7o357q5vihsbqgacmcfei2b9rb.apps.googleusercontent.com', // Replace with your Google Client ID
-                scope: 'profile email',
-                redirect_uri: 'https://akashuv-21.github.io/image-converter/', // Replace with your GitHub Pages URL
-                response_type: 'token'
-            };
-
-            const url = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(params)}`;
-            window.location.href = url;
-        }
-
-        // Check Conversion Count
-        function getConversionCount() {
-            return parseInt(localStorage.getItem('conversionConversion') || 0);
-        }
-
-        function setConversionCount(count) {
-            localStorage.setItem('conversionCount', count);
-        }
-
-        async function convertImage() {
-            const conversionCount = getConversionCount();
-            if (conversionCount >= 3) {
-                document.getElementById('googleSignIn').style.display = 'block';
-                alert('You have reached the free conversion limit. Please sign in with Google to continue.');
-                return;
-            }
-
-            const input = document.getElementById('imageInput');
-            const file = input.files[0];
-            if (!file) {
-                alert('Please select an image file.');
-                return;
-            }
-
-            if (file.size > 5 * 1024 * 1024) { // 5 MB limit
-                alert('File size exceeds 5 MB limit.');
-                return;
-            }
-
-            const format = document.getElementById('format').value;
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', 'unassigned'); // Replace with your Upload Preset name
-
-            const progressBarFill = document.getElementById('progressBarFill');
-            progressBarFill.style.width = '0%';
-
-            try {
-                const uploadResponse = await fetch('https://api.cloudinary.com/v1_1/dqdtx0sv6/image/upload', { // Replace with your Cloud Name
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!uploadResponse.ok) {
-                    throw new Error('Upload failed');
-                }
-
-                const uploadData = await uploadResponse.json();
-                const publicId = uploadData.public_id;
-
-                progressBarFill.style.width = '50%';
-
-                const conversionResponse = await fetch(`https://res.cloudinary.com/dqdtx0sv6/image/upload/v1/${publicId}.${format}`); // Replace with your Cloud Name
-                if (!conversionResponse.ok) {
-                    throw new Error('Conversion failed');
-                }
-
-                const blob = await conversionResponse.blob();
-                const url = URL.createObjectURL(blob);
-
-                progressBarFill.style.width = '100%';
-
-                const output = document.getElementById('output');
-                output.innerHTML = `<img src="${url}" alt="Converted Image" style="max-width: 100%; height: auto;">`;
-
-                const downloadLink = document.getElementById('downloadLink');
-                downloadLink.href = url;
-                downloadLink.download = `converted_image.${format}`;
-                downloadLink.style.display = 'block';
-
-                setConversionCount(conversionCount + 1);
-            } catch (error) {
-                console.error('Error converting image:', error);
-                alert('Error converting image. Please try again.');
-            } finally {
-                progressBarFill.style.width = '0%';
-            }
-        }
-
-        // Check Google Sign-In Status
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.hash.substring(1));
-            const accessToken = urlParams.get('access_token');
-            if (accessToken) {
-                document.getElementById('googleSignIn').style.display = 'none';
-                alert('You are signed in with Google. You can now convert images without limits.');
-            }
-        };
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
